@@ -121,6 +121,22 @@ class ExecLibrary(AmigaLibrary):
     log_exec.info("FindResident: '%s'" % (name))
     return 0
 
+  def FindName(self, ctx):
+    node_ptr = ctx.cpu.r_reg(REG_A0)
+    name_ptr = ctx.cpu.r_reg(REG_A1)
+    name = ctx.mem.access.r_cstr(name_ptr)
+    label = ctx.label_mgr.get_label(node_ptr)
+    val = ctx.mem.access.r32(node_ptr)
+    if label is not None:
+      off = node_ptr - label.lib_base
+    else:
+      off = 0
+    log_exec.info("FindName: '%s' @%06x -> %s + %d" % (name, node_ptr, label, off))
+    # fake some names
+    if name in ('trackdisk.device', 'intuition.library', 'MorphOS'):
+      return 0xdeadbeef
+    return 0
+
   # ----- Memory Handling -----
   
   def AllocMem(self, ctx):
