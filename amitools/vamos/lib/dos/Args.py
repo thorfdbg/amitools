@@ -240,7 +240,7 @@ class Args:
         fpos = self._find_key_pos_and_remove(targ['keys'], args)
         if fpos != None:
           # use args after found pos
-          multi_pos = fpos
+          multi_pos = pos
           multi_targ = targ
           result[pos] = args[fpos:]
         else:
