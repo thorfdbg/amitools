@@ -54,7 +54,7 @@ class SegmentLoader:
 
   def can_load_seg(self, lock, ami_bin_file, local_path = False):
     if local_path:
-      return self.path_mgr.ami_to_sys_path(lock,ami_bin_file,searchMulti=True) != None
+      return self.path_mgr.ami_to_sys_path(lock,ami_bin_file,searchMulti=True,mustExist=True) != None
     else:
       return self.path_mgr.ami_command_to_sys_path(lock, ami_bin_file) != None
 
