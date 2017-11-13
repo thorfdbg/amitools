@@ -231,6 +231,26 @@ class Args:
     # scan for multi and non-key args
     multi_pos = None
     multi_targ = None
+
+    # thor: fill regular args first
+    pos = 0
+    for targ in targs:
+      # normal non-multi required entry that is not yet filled
+      if targ['x'] and not targ['m'] and result[pos] == None:
+        # take from array
+        if len(args)>0:
+          val = self.unquote(args[0])
+          del args[0]
+        else:
+          if targ['a']:
+            self.error = ERROR_REQUIRED_ARG_MISSING
+            return False
+        if targ['n'] and val != None:
+          val = int(val)
+        else:
+          val = self.unquote(val)
+        result[pos] = val
+      pos = pos + 1
     
     pos = 0
     for targ in targs:
