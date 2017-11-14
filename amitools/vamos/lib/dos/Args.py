@@ -238,24 +238,18 @@ class Args:
       # normal non-multi required entry that is not yet filled
       if targ['x'] and not targ['m'] and result[pos] == None:
         # take from array
+        val = None
         if len(args)>0:
           val = self.unquote(args[0])
           del args[0]
-        else:
-          if targ['a']:
-            self.error = ERROR_REQUIRED_ARG_MISSING
-            return False
-        if targ['n'] and val != None:
-          val = int(val)
-        else:
-          val = self.unquote(val)
+        # if this is an 'a' arg, it will steal from multi later
+        if val != None:
+          if targ['n']:
+            val = int(val)
+          else:
+            val = self.unquote(val)
         result[pos] = val
-      pos = pos + 1
-    
-    pos = 0
-    for targ in targs:
-      # multi
-      if targ['m']:
+      elif targ['m']:
         # try to find multi keys
         fpos = self._find_key_pos_and_remove(targ['keys'], args)
         if fpos != None:
