@@ -1419,7 +1419,14 @@ class DosLibrary(AmigaLibrary):
     lock     = self.get_current_dir()
     seg_list = self.ctx.seg_loader.load_seg(lock,name,False,True)
     if seg_list == None:
-      log_dos.warn("LoadSeg: '%s' -> not found!" % (name))
+      fh = self.file_mgr.open(lock, name, "rb")
+      if fh == None:
+        self.setioerr(ctx,ERROR_OBJECT_NOT_FOUND)
+        log_dos.warn("LoadSeg: '%s' -> not found!" % (name))
+      else:
+        self.file_mgr.close(fh)
+        self.setioerr(ctx,ERROR_OBJECT_WRONG_TYPE)
+        log_dos.warn("LoadSeg: '%s' -> wrong type!" % (name))
       return 0
     else:
       log_dos.info("LoadSeg: '%s' -> %s" % (name, seg_list))
