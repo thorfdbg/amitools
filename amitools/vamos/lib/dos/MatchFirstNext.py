@@ -3,6 +3,7 @@ from PathMatch import PathMatch
 from amitools.vamos.label.LabelStruct import LabelStruct
 from amitools.vamos.AccessStruct import AccessStruct
 from Error import *
+from PathPart import *
 
 class MatchFirstNext:
 
@@ -70,7 +71,7 @@ class MatchFirstNext:
     # store path name of first name at end of structure
     if self.str_len > 0:
       path_ptr = self.anchor.s_get_addr('ap_Buf')
-      self.anchor.w_cstr(path_ptr, path)
+      self.anchor.w_cstr(path_ptr, path[file_part(path):])
     return io_err
 
   def _fill_lock(self, path):

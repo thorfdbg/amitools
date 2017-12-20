@@ -161,7 +161,9 @@ class PathManager:
       return self.ami_abs_parent_path(path[:-1])
     pos = path.rfind('/')
     # skip last part if we have parts
-    if pos > -1:
+    if pos == 0:
+      return "/"
+    elif pos > -1:
       return path[0:pos]
     # keep only device if we have it
     else:
