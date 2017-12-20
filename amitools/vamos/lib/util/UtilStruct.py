@@ -9,3 +9,12 @@ class TagItemStruct(AmigaStruct):
   ]
 TagItemDef = TagItemStruct()
 
+class HookStruct(AmigaStruct):
+  _name = "Hook"
+  _format = [
+    ('MinNode','h_MinNode'),
+    ('APTR','h_Entry'),
+    ('APTR','h_SubEntry'),
+    ('APTR','h_Data')
+    ]
+HookDef = HookStruct()

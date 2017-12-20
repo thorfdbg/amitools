@@ -50,7 +50,7 @@ def taglist_parse_tagitem_ptr(mem, addr, tag_info=None):
     elif tag == TAG_IGNORE:
       addr += 8
     elif tag == TAG_SKIP:
-      addr += 8
+      addr += 8 + 8 * data
     elif tag == TAG_MORE:
       addr = data
     else:

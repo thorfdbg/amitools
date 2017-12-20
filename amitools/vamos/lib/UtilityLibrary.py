@@ -1,6 +1,10 @@
 from amitools.vamos.AmigaLibrary import *
 from amitools.vamos.lib.lexec.ExecStruct import LibraryDef
 from amitools.vamos.Log import *
+from amitools.vamos.AccessStruct import AccessStruct
+from util.UtilStruct import *
+from util.TagList import *
+
 
 class UtilityLibrary(AmigaLibrary):
   name = "utility.library"
@@ -81,4 +85,46 @@ class UtilityLibrary(AmigaLibrary):
     else:
       return 0
 
+  def CallHookPkt(self, ctx):
+    hk_ptr = ctx.cpu.r_reg(REG_A0)
+    hook = AccessStruct(ctx.mem,HookDef,struct_addr=hk_ptr)
+    func = hook.r_s("h_Entry")
+    log_utility.info("CallHookPkt(0x%08x) call 0x%08x" % (hk_ptr,func))
+    old_stack = ctx.cpu.r_reg(REG_A7)
+    old_pc    = ctx.cpu.r_reg(REG_PC)
+    new_stack = old_stack - 4
+    ctx.cpu.w_reg(REG_A7, new_stack)
+    ctx.mem.access.w32(new_stack, func)
 
+  def FilterTagItems(self, ctx):
+    taglist_ptr = ctx.cpu.r_reg(REG_A0)
+    filter_ptr  = ctx.cpu.r_reg(REG_A1)
+    logic       = ctx.cpu.r_reg(REG_D0)
+    nvalid      = 0
+    while True:
+      tag = ctx.mem.access.r32(taglist_ptr)
+      if tag == TAG_DONE:
+        break
+      elif tag == TAG_IGNORE:
+        taglist_ptr += 8
+      elif tag == TAG_SKIP:
+        skip_count   = ctx.mem.access.r32(taglist_ptr + 4)
+        taglist_ptr += 8 + 8 * skip_count
+      elif tag == TAG_MORE:
+        taglist_ptr = ctx.mem.access.r32(taglist_ptr + 4)
+      else:
+        filt = filter_ptr
+        while True:
+          ftag = ctx.mem.access.r32(filt)
+          if ftag == TAG_DONE:
+            break
+          if ftag == tag:
+            break
+          filt += 4
+        if (ftag == tag and logic == 0) or (ftag != tag and logic != 0):
+            nvalid += 1
+        else:
+            ctxt.mem.access.w32(taglist_ptr,TAG_IGNORE)
+        taglist_ptr += 8
+    log_utility.info("FilterTagItems(0x%08x,0x%08lx,%d) -> %d" % (taglist_ptr,filter_ptr,logic,nvalid))
+    return nvalid
