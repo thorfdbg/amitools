@@ -187,6 +187,10 @@ class FileManager:
     if prot.is_r():
       posix_mask |= stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH
     posix_mask &= ~self.umask
+    if prot.is_p():
+      posix_mask |= stat.S_ISUID
+    if prot.is_s():
+      posix_mask |= stat.S_ISGID
     log_file.info("set protection: '%s': %s -> '%s': posix_mask=%03o umask=%03o", ami_path, prot, sys_path, posix_mask, self.umask)
     try:
       os.chmod(sys_path, posix_mask)

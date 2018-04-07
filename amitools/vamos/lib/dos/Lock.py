@@ -71,6 +71,11 @@ class Lock:
         prot.clr(DosProtection.FIBF_READ)
       if mode & stat.S_IWUSR == 0:
         prot.clr(DosProtection.FIBF_WRITE)
+        prot.clr(DosProtection.FIBF_DELETE)
+      if mode & stat.S_ISUID != 0:
+        prot.set(DosProtection.FIBF_PURE)
+      if mode & stat.S_ISGID != 0:
+        prot.set(DosProtection.FIBF_SCRIPT)
       log_lock.debug("examine lock: '%s' mode=%03o: prot=%s", name, mode, prot)
     except OSError:
       return ERROR_OBJECT_IN_USE

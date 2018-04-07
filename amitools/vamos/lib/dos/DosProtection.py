@@ -15,18 +15,18 @@ class DosProtection:
     txt = "[%02x]" % self.mask
     val = 64
     for i in xrange(7):
-      if self.mask & val == val:
+      if (self.mask ^ 15) & val == 0:
         txt += '-'
       else:
         txt += self.flag_txt[i]
       val >>= 1
     return txt
   def is_set(self, mask):
-    return self.mask & mask == 0 # LO active
+    return (self.mask ^ 15) & mask != 0
   def set(self, mask):
-    self.mask &= ~mask
+    self.mask = ((self.mask ^ 15) | mask) ^ 15
   def clr(self, mask):
-    self.mask |= mask
+    self.mask = ((self.mask ^ 15) & ~mask) ^ 15
 
   def is_d(self):
     return self.is_set(self.FIBF_DELETE)
@@ -36,3 +36,7 @@ class DosProtection:
     return self.is_set(self.FIBF_WRITE)
   def is_r(self):
     return self.is_set(self.FIBF_READ)
+  def is_s(self):
+    return self.is_set(self.FIBF_SCRIPT)
+  def is_p(self):
+    return self.is_set(self.FIBF_PURE)
