@@ -26,6 +26,30 @@ from Log import *
 from CPU import *
 from Exceptions import *
 
+import sys
+import linecache
+
+class Tracer(object):
+  def __init__(self):
+    self.tracefile = open("tracelog","w")
+    
+  def traceit(self, frame, event, arg):
+    if event == "line":
+        lineno = frame.f_lineno
+        filename = frame.f_globals["__file__"]
+        if (filename.endswith(".pyc") or
+            filename.endswith(".pyo")):
+            filename = filename[:-1]
+        name = frame.f_globals["__name__"]
+        line = linecache.getline(filename, lineno)
+        print >>self.tracefile, "%s:%s %s " % (name, lineno, line.rstrip())
+        try:
+          print >>self.tracefile, frame.f_locals
+        except:
+          pass
+        print >>self.tracefile
+    return self.traceit
+
 class Vamos:
 
   def __init__(self, raw_mem, cpu, traps, cfg):
@@ -35,6 +59,7 @@ class Vamos:
     self.cpu_type = cfg.cpu
     self.traps = traps
     self.cfg = cfg
+    #sys.settrace(Tracer().traceit)
 
     # too much RAM requested?
     # our "custom chips" start at $BFxxxx so we allow RAM only to be below
