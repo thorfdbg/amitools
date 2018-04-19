@@ -56,7 +56,7 @@ def pattern_parse(src_str, ignore_case=True, star_is_wild=False):
   flush_blocks = False
   
   if ignore_case:
-    tr = lambda x : x.lower()
+    tr = lambda x : x.upper()
   else:
     tr = lambda x : x
   
@@ -313,7 +313,7 @@ def _scan_or_block(pat, pat_pos, str_pos, markers):
 def pattern_match(pattern, in_str, ignore_case=True, debug=False):
   """match pattern pat against str and return True/False"""
   if ignore_case:
-    tr = lambda x : x.lower()
+    tr = lambda x : x.upper()
   else:
     tr = lambda x : x
 
