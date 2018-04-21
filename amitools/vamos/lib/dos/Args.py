@@ -224,6 +224,15 @@ class Args:
                 val = self.unquote(val)
               result[pos] = val
               targ['x'] = False # disable to reject auto fill
+      elif targ['m']:
+        fpos = self._find_key_pos_and_remove(targ['keys'], args)
+        if fpos != None:
+          # use args after found pos
+          result[pos] = []
+          while fpos != None:
+            result[pos].append(args[fpos])
+            args.pop(fpos)
+            fpos = self._find_key_pos_and_remove(targ['keys'], args)
       elif targ['f']:
         fullPos = pos
       pos = pos + 1
@@ -249,19 +258,11 @@ class Args:
           else:
             val = self.unquote(val)
         result[pos] = val
-      elif targ['m']:
+      elif targ['m'] and result[pos] == None:
         # try to find multi keys
-        fpos = self._find_key_pos_and_remove(targ['keys'], args)
-        if fpos != None:
-          # use args after found pos
-          multi_pos = pos
-          multi_targ = targ
-          result[pos] = args[fpos:]
-        else:
-          # use current args
-          multi_pos = pos
-          multi_targ = targ
-          result[pos] = args
+        multi_pos = pos
+        multi_targ = targ
+        result[pos] = args
         args = []
         # multi arg required
         if targ['a'] and len(result[pos])==0:
