@@ -384,6 +384,28 @@ class ExecLibrary(AmigaLibrary):
     AccessStruct(ctx.mem, NodeDef, h).w_s("ln_Pred", node_addr)
     l.w_s("lh_Head", node_addr)
 
+  def Insert(self, ctx):
+    listNode_addr = ctx.cpu.r_reg(REG_A2)
+    if listNode_addr == 0:
+      self.AddHead(ctx)
+    else:
+      node_addr = ctx.cpu.r_reg(REG_A1)
+      listNode  = AccessStruct(ctx.mem, NodeDef, listNode_addr)
+      n         = AccessStruct(ctx.mem, NodeDef, node_addr)
+      succ_addr = listNode.r_s("ln_Succ")
+      if succ_addr == 0:
+        tail_addr = listNode.r_s("ln_Pred")
+        n.w_s("ln_Succ",listNode_addr)
+        n.w_s("ln_Pred",tail_addr)
+        listNode.w_s("ln_Pred",node_addr)
+        AccessStruct(ctx.mem, NodeDef, tail_addr).w_s("ln_Succ",node_addr)
+      else:
+        s = AccessStruct(ctx.mem, NodeDef, succ_addr)
+        n.w_s("ln_Succ",succ_addr)
+        n.w_s("ln_Pred",listNode_addr)
+        listNode.w_s("ln_Succ",node_addr)
+        s.w_s("ln_Pred",node_addr)
+
   def Remove(self, ctx):
     node_addr = ctx.cpu.r_reg(REG_A1)
     n = AccessStruct(ctx.mem, NodeDef, node_addr)
