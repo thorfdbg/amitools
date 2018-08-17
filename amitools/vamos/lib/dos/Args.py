@@ -297,6 +297,11 @@ class Args:
         else:
           val = self.unquote(val)
         result[pos] = val
+      elif targ['m']:
+        # THOR: left-over args are assigned to the multi-arg
+        # if there is any left.
+        result[pos] = result[pos] + args
+        args = []
       elif targ['f']:
         res = None
         # THOR: Reconstruct the rest of the line. Actually
