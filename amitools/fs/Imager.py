@@ -2,12 +2,15 @@ import os
 import os.path
 import sys
 import unicodedata
+import argparse
 
 from ADFSDir import ADFSDir
 from ADFSFile import ADFSFile
 from ADFSVolume import ADFSVolume
 from MetaDB import MetaDB
 import DosType
+from MetaInfo import MetaInfo
+from ProtectFlags import ProtectFlags
 from amitools.fs.block.BootBlock import BootBlock
 from amitools.fs.blkdev.BlkDevFactory import BlkDevFactory
 from amitools.fs.blkdev.DiskGeometry import DiskGeometry
@@ -117,7 +120,7 @@ class Imager:
 
   # ----- pack -----
 
-  def pack(self, in_path, image_file, force=True, options=None, dos_type=None):
+  def pack(self, in_path, image_file, force=True, options=None, dos_type=None, boot_code=None):
     self.pack_begin(in_path)
     blkdev = self.pack_create_blkdev(in_path, image_file, force, options)
     if blkdev == None:
@@ -126,7 +129,8 @@ class Imager:
     if not volume.valid:
       raise IOError("Can't create volume for image: "+in_path)
     self.pack_root(in_path, volume)
-    self.pack_end(in_path, volume)
+    self.pack_end(in_path, volume, boot_code)
+    blkdev.flush()
 
   def pack_begin(self, in_path):
     # remove trailing slash
@@ -137,8 +141,9 @@ class Imager:
       self.meta_db = MetaDB()
       self.meta_db.load(meta_path)
 
-  def pack_end(self, in_path, volume):
-    boot_code_path = in_path + ".bootcode"
+  def pack_end(self, in_path, volume, boot_code_path = None):
+    if boot_code_path == None:
+      boot_code_path = in_path + ".bootcode"
     if os.path.exists(boot_code_path):
       # read boot code
       f = open(boot_code_path, "rb")
@@ -208,7 +213,11 @@ class Imager:
         ami_path = ami_name
       meta_info = self.meta_db.get_meta_info(ami_path)
     else:
-      meta_info = None
+      meta_info = MetaInfo() # thor mod
+      protect   = ProtectFlags()
+      protect.fromPath(in_path)
+      meta_info.set_protect_flags(protect)
+      meta_info.set_mod_time(os.path.getmtime(in_path))
 
     # pack directory
     if os.path.isdir(in_path):
@@ -226,3 +235,35 @@ class Imager:
       node = parent_node.create_file(FSString(ami_name), data, meta_info, False)
       node.flush()
       self.total_bytes += len(data)
+
+
+# ----- main -----------------------------------------------------------------
+def main():
+  # --- args ----
+  parser = argparse.ArgumentParser()
+  parser.add_argument('src',help="Source directory to pack")
+  parser.add_argument('adf',help="Target ADF to create")
+  parser.add_argument('-F','--ffs', action='store_true',help="create FFS instead of OFS file system",default=False)
+  parser.add_argument('-I','--intl', action='store_true',help="create international version of file system",default=False)
+  parser.add_argument('-B','--bootable', action='store_true',help="make floppy bootable",default=False)
+  args   = parser.parse_args()
+  imager = Imager()
+  dostype = DosType.DOS0
+  if args.ffs:
+    if args.intl:
+      dostype = DosType.DOS3
+    else:
+      dostype = DosType.DOS1
+  else:
+    if args.intl:
+      dostype = DosType.Dos2
+    else:
+      dostype = DosType.Dos0
+  if args.bootable:
+    bootcode="bootcode"
+  else:
+    bootcode=None
+  imager.pack(args.src,args.adf,dos_type=dostype,boot_code=bootcode)
+
+if __name__ == '__main__':
+  sys.exit(main())

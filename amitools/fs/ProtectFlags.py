@@ -1,4 +1,6 @@
 from FSError import *
+import os
+import stat
 
 class ProtectFlags:
   FIBF_DELETE = 1
@@ -91,6 +93,21 @@ class ProtectFlags:
     self.mask &= ~mask
   def clr(self, mask):
     self.mask |= mask
+    
+  def fromPath(self, path):
+    os_stat = os.stat(path)
+    mode = os_stat.st_mode
+    if mode & stat.S_IXUSR == 0:
+      self.mask |= self.FIBF_EXECUTE
+    if mode & stat.S_IRUSR == 0:
+      self.mask |= self.FIBF_READ
+    if mode & stat.S_IWUSR == 0:
+      self.mask |= self.FIBF_WRITE
+      self.mask |= self.FIBF_DELETE
+    if mode & stat.S_ISUID != 0:
+      self.mask |= self.FIBF_PURE
+    if mode & stat.S_ISGID != 0:
+      self.mask |= self.FIBF_SCRIPT
 
   def is_d(self):
     return self.is_set(self.FIBF_DELETE)

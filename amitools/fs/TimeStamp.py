@@ -1,4 +1,5 @@
 import time
+import os
 
 ts_empty_string = "--.--.---- --:--:--.--"
 ts_format = "%d.%m.%Y %H:%M:%S"
@@ -8,7 +9,7 @@ class TimeStamp:
     self.days = days
     self.mins = mins
     self.ticks = ticks
-    self.secs = days * 24 * 60 * 60 + mins * 60 + (ticks / 50)
+    self.secs = (days + 2922) * 24 * 60 * 60 + mins * 60 + (ticks / 50)
     self.sub_secs = (ticks % 50)
   
   def __str__(self):
@@ -23,13 +24,23 @@ class TimeStamp:
     return self.secs
   
   def from_secs(self, secs):
-    ticks = secs * 50
-    mins = ticks / (50 * 60)
-    self.ticks = ticks % (50 * 60)
-    self.days = mins / (60 * 24)
-    self.mins = mins % (60 * 24)
-    self.secs = secs
-    self.sub_secs = 0
+    ts   = int(secs)      #entire seconds since epoch
+    tmil = secs - ts      #milliseconds
+    tmin = ts / 60        #entire minutes
+    ts   = ts % 60        #seconds
+    tday = tmin / (60*24) #days
+    tmin = tmin % (60*24) #minutes
+    ts  += tmil           #seconds including milliseconds
+    tick = int(ts * 50)   # 1/50 sec
+    self.ticks = tick
+    self.mins  = tmin
+    self.days  = tday - 2922
+    self.secs  = secs
+    self.sub_secs = (tick % 50)
+
+  def from_path(self, path):
+    t = os.path.getmtime(path)
+    self.from_secs(t)
   
   def parse(self, s):
     # check for ticks
