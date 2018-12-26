@@ -45,7 +45,10 @@ class ErrorTracker:
     # memory error?
     if isinstance(e, InvalidMemoryAccessError):
       addr = e.addr
-      label,offset = self.label_mgr.get_label_offset(addr)
+      if self.label_mgr != None:
+        label,offset = self.label_mgr.get_label_offset(addr)
+      else:
+        label = None
       if label != None:
         log_main.error("%s -> +%06x %s",e,offset,label)
       else:
@@ -54,7 +57,10 @@ class ErrorTracker:
       log_main.error(e)
     # give CPU state dump
     pc = self.cpu_state.pc
-    label,offset = self.label_mgr.get_label_offset(pc)
+    if self.label_mgr != None:
+      label,offset = self.label_mgr.get_label_offset(pc)
+    else:
+      label = None
     if label != None:
       log_main.error("PC=%08x -> +%06x %s",pc,offset,label)
     for d in self.cpu_state.dump():

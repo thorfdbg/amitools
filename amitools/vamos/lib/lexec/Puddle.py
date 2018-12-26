@@ -14,7 +14,8 @@ class Puddle:
 
   def __del__(self):
     if self.raw_mem != None:
-      self.label_mgr.delete_labels_within(self.raw_mem.addr,self.raw_size)
+      if self.label_mgr != None:
+        self.label_mgr.delete_labels_within(self.raw_mem.addr,self.raw_size)
       self.chunks = None
       self.alloc.free_memory(self.raw_mem)
       self.raw_mem = None

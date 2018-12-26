@@ -43,11 +43,11 @@ class Tracer(object):
         name = frame.f_globals["__name__"]
         line = linecache.getline(filename, lineno)
         print >>self.tracefile, "%s:%s %s " % (name, lineno, line.rstrip())
-        try:
-          print >>self.tracefile, frame.f_locals
-        except:
-          pass
-        print >>self.tracefile
+        #try:
+        #  print >>self.tracefile, frame.f_locals
+        #except:
+        #  pass
+        #print >>self.tracefile
     return self.traceit
 
 class Vamos:
@@ -75,13 +75,18 @@ class Vamos:
     self.path_mgr = PathManager( cfg )
 
     # create a label manager and error tracker
-    self.label_mgr = LabelManager()
+    if self.cfg.label_mgr != "disable":
+      self.label_mgr = LabelManager()
+    else:
+      self.label_mgr = None
     self.error_tracker = ErrorTracker(cpu, self.label_mgr)
-    self.label_mgr.error_tracker = self.error_tracker
+    if self.label_mgr != None:
+      self.label_mgr.error_tracker = self.error_tracker
 
     # set a label for first two dwords
-    label = LabelRange("zero_page",0,8)
-    self.label_mgr.add_label(label)
+    if self.label_mgr != None:
+      label = LabelRange("zero_page",0,8)
+      self.label_mgr.add_label(label)
 
     # create memory access
     self.mem = MainMemory(raw_mem, self.error_tracker)
@@ -131,13 +136,13 @@ class Vamos:
   def _setup_memory(self, mem):
     cfg = self.cfg
     # enable mem trace?
-    if cfg.memory_trace:
+    if cfg.memory_trace and self.label_mgr != None:
       mem.set_trace_mode(1)
       mem.set_trace_func(self.label_mgr.trace_mem)
       if not log_mem.isEnabledFor(logging.DEBUG):
         log_mem.setLevel(logging.DEBUG)
     # enable internal memory trace?
-    if cfg.internal_memory_trace:
+    if cfg.internal_memory_trace and self.label_mgr != None:
       AccessMemory.label_mgr = self.label_mgr
       if not log_mem_int.isEnabledFor(logging.INFO):
         log_mem_int.setLevel(logging.INFO)
@@ -381,6 +386,7 @@ class Vamos:
     # create a guard memory for tracking invalid old dos access
     self.dos_guard_base = self.mem.reserve_special_range()
     self.dos_guard_size = 0x010000
-    label = LabelRange("old_dos guard",self.dos_guard_base, self.dos_guard_size)
-    self.label_mgr.add_label(label)
-    log_mem_init.info(label)
+    if self.label_mgr != None:
+      label = LabelRange("old_dos guard",self.dos_guard_base, self.dos_guard_size)
+      self.label_mgr.add_label(label)
+      log_mem_init.info(label)

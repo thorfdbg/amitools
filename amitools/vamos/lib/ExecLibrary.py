@@ -86,9 +86,10 @@ class ExecLibrary(AmigaLibrary):
     # get adress of callee
     callee = ctx.mem.access.r32(old_pointer)
     # is a label attached to new addr
-    label = ctx.label_mgr.get_label(new_lower)
-    if label is not None:
-      label.name = label.name + "=Stack"
+    if ctx.label_mgr != None:
+      label = ctx.label_mgr.get_label(new_lower)
+      if label is not None:
+        label.name = label.name + "=Stack"
     # we report the old stack befor callee
     old_pointer += 4
     log_exec.info("StackSwap: old(lower=%06x,upper=%06x,ptr=%06x) new(lower=%06x,upper=%06x,ptr=%06x)" % (old_lower,old_upper,old_pointer,new_lower,new_upper,new_pointer))
@@ -173,7 +174,10 @@ class ExecLibrary(AmigaLibrary):
     poolid = ctx.cpu.r_reg(REG_A0)
     size   = (ctx.cpu.r_reg(REG_D0) + 7) & -8
     pc     = self.get_callee_pc(ctx)
-    tag    = ctx.label_mgr.get_mem_str(pc)
+    if ctx.label_mgr != None:
+      tag  = ctx.label_mgr.get_mem_str(pc)
+    else:
+      tag  = None
     name   = "AllocPooled(%06x = %s)" % (pc,tag)
     if poolid in self._pools:
       pool = self._pools[poolid]
@@ -213,7 +217,10 @@ class ExecLibrary(AmigaLibrary):
     flags = ctx.cpu.r_reg(REG_D1)
     # label alloc
     pc = self.get_callee_pc(ctx)
-    tag = ctx.label_mgr.get_mem_str(pc)
+    if ctx.label_mgr != None:
+      tag = ctx.label_mgr.get_mem_str(pc)
+    else:
+      tag = None
     name = "AllocMem(%06x = %s)" % (pc,tag)
     mb = self.alloc.alloc_memory(name,size)
     log_exec.info("AllocMem: %s -> 0x%06x %d bytes" % (mb,mb.addr,size))
@@ -304,7 +311,10 @@ class ExecLibrary(AmigaLibrary):
     size = ctx.cpu.r_reg(REG_D0)
     # label alloc
     pc   = self.get_callee_pc(ctx)
-    tag  = ctx.label_mgr.get_mem_str(pc)
+    if ctx.label_mgr != None:
+      tag  = ctx.label_mgr.get_mem_str(pc)
+    else:
+      tag  = None
     name = "CreateIORequest(%06x = %s)" % (pc,tag)
     mb   = self.alloc.alloc_memory(name,size)
     log_exec.info("CreateIORequest: (%s,%s,%s) -> 0x%06x %d bytes" % (mb,port,size,mb.addr,size))
