@@ -411,7 +411,7 @@ class DosLibrary(AmigaLibrary):
       name_addr= seg_addr + SegmentDef.get_offset_for_name("seg_Name")[0]
       name     = ctx.mem.access.r_bstr(name_addr)
       if name.lower() == needle.lower():
-        if (system and segment.r_s("seg_UC") < 0) or (not system and segment.r_s("seg_UC") > 0):
+        if (system and segment.r_s("seg_UC") >= 0x80000000) or (not system and segment.r_s("seg_UC") > 0):
           seg  = segment.r_s("seg_Seg")
           log_dos.info("FindSegment(%s) -> %06x" % (name,seg))
           return seg_addr
