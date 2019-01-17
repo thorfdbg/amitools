@@ -43,11 +43,11 @@ class Tracer(object):
         name = frame.f_globals["__name__"]
         line = linecache.getline(filename, lineno)
         print >>self.tracefile, "%s:%s %s " % (name, lineno, line.rstrip())
-        #try:
-        #  print >>self.tracefile, frame.f_locals
-        #except:
-        #  pass
-        #print >>self.tracefile
+        try:
+          print >>self.tracefile, frame.f_locals
+        except:
+          pass
+        print >>self.tracefile
     return self.traceit
 
 class Vamos:
