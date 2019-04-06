@@ -411,7 +411,10 @@ class DosLibrary(AmigaLibrary):
       name_addr= seg_addr + SegmentDef.get_offset_for_name("seg_Name")[0]
       name     = ctx.mem.access.r_bstr(name_addr)
       if name.lower() == needle.lower():
-        if (system and segment.r_s("seg_UC") >= 0x80000000) or (not system and segment.r_s("seg_UC") > 0):
+        uc = segment.r_s("seg_UC")
+        if uc >= 0x80000000:
+          uc -= 0x100000000
+        if (system and uc < 0) or (not system and uc > 0):
           seg  = segment.r_s("seg_Seg")
           log_dos.info("FindSegment(%s) -> %06x" % (name,seg))
           return seg_addr
@@ -458,7 +461,7 @@ class DosLibrary(AmigaLibrary):
     fh = self.file_mgr.get_by_b_addr(fh_b_addr)
     log_dos.info("SelectInput(fh=%s)" % fh)
     cur_in = self.Input(ctx)
-    ctx.process.set_input(fh)
+    ctx.process.this_task.access.w_s("pr_CIS", fh_b_addr << 2) # compensate BCPL auto-conversion
     return cur_in
 
   def SelectOutput(self, ctx):
@@ -466,7 +469,7 @@ class DosLibrary(AmigaLibrary):
     fh = self.file_mgr.get_by_b_addr(fh_b_addr)
     log_dos.info("SelectOutput(fh=%s)" % fh)
     cur_out = self.Output(ctx)
-    ctx.process.set_output(fh)
+    ctx.process.this_task.access.w_s("pr_COS", fh_b_addr << 2) # compensate BCPL auto-conversion
     return cur_out
 
   def Open(self, ctx):
@@ -590,6 +593,8 @@ class DosLibrary(AmigaLibrary):
 
   def FGetC(self, ctx):
     fh_b_addr = ctx.cpu.r_reg(REG_D1)
+    if fh_b_addr == 0:
+      return -1
     fh = self.file_mgr.get_by_b_addr(fh_b_addr,False)
     ch = fh.getc()
     if ch == -1:
@@ -600,6 +605,8 @@ class DosLibrary(AmigaLibrary):
 
   def FPutC(self, ctx):
     fh_b_addr = ctx.cpu.r_reg(REG_D1)
+    if fh_b_addr == 0:
+      return -1
     val = ctx.cpu.r_reg(REG_D2)
     fh = self.file_mgr.get_by_b_addr(fh_b_addr,True)
     log_dos.info("FPutC(%s, '%c' (%d))" % (fh, val, val))
@@ -608,6 +615,8 @@ class DosLibrary(AmigaLibrary):
 
   def FPuts(self, ctx):
     fh_b_addr = ctx.cpu.r_reg(REG_D1)
+    if fh_b_addr == 0:
+      return -1
     str_ptr = ctx.cpu.r_reg(REG_D2)
     str_dat = ctx.mem.access.r_cstr(str_ptr)
     # write to stdout
@@ -637,6 +646,8 @@ class DosLibrary(AmigaLibrary):
 
   def Flush(self, ctx):
     fh_b_addr = ctx.cpu.r_reg(REG_D1)
+    if fh_b_addr == 0:
+      return -1
     fh = self.file_mgr.get_by_b_addr(fh_b_addr,True)
     fh.flush()
     return -1
@@ -659,6 +670,8 @@ class DosLibrary(AmigaLibrary):
 
   def VFPrintf(self, ctx):
     fh_b_addr = ctx.cpu.r_reg(REG_D1)
+    if fh_b_addr == 0:
+      return -1
     fh = self.file_mgr.get_by_b_addr(fh_b_addr,True)
     format_ptr = ctx.cpu.r_reg(REG_D2)
     argv_ptr = ctx.cpu.r_reg(REG_D3)
@@ -684,6 +697,8 @@ class DosLibrary(AmigaLibrary):
 
   def VFWritef(self, ctx):
     fh_b_addr = ctx.cpu.r_reg(REG_D1)
+    if fh_b_addr == 0:
+      return -1
     fh = self.file_mgr.get_by_b_addr(fh_b_addr,True)
     fmt_ptr = ctx.cpu.r_reg(REG_D2)
     args_ptr = ctx.cpu.r_reg(REG_D3)
@@ -748,6 +763,8 @@ class DosLibrary(AmigaLibrary):
 
   def FGets(self,ctx):
     fh_b_addr = ctx.cpu.r_reg(REG_D1)
+    if fh_b_addr == 0:
+      return -1
     bufaddr   = ctx.cpu.r_reg(REG_D2)
     buflen    = ctx.cpu.r_reg(REG_D3)
     fh   = self.file_mgr.get_by_b_addr(fh_b_addr,False)
@@ -1617,6 +1634,7 @@ class DosLibrary(AmigaLibrary):
     return 0
 
   def CliInitRun(self, ctx):
+    log_dos.info("CliInitRun")
     clip_addr = self.Cli(ctx)
     clip      = AccessStruct(ctx.mem,CLIDef,struct_addr=clip_addr)
     pkt       = ctx.cpu.r_reg(REG_A0)

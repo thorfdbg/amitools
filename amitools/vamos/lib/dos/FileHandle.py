@@ -86,13 +86,13 @@ class FileHandle:
     # part of a line in a buffer, so we have to (bummer!)
     # Do that now so that the next read gets the rest
     # of the line.
-    remains = ""
-    while ch != 10:
-      ch = self.getc()
-      if ch == -1:
-        break
-      remains = remains + chr(ch)
-    self.unch = remains + self.unch
+    #remains = ""
+    #while ch != 10:
+    #  ch = self.getc()
+    #  if ch == -1:
+    #    break
+    #  remains = remains + chr(ch)
+    #self.unch = remains + self.unch
     return res
 
   def ungetc(self, var):

@@ -186,7 +186,7 @@ class Process:
     self.ctx.alloc.free_struct(self.cli)
 
   def get_cli_struct(self):
-    return self.cli.addr
+    return self.ctx.process.this_task.access.r_s("pr_CLI")
 
   # ----- initialize for running a command in a shell -----
 
