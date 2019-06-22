@@ -242,7 +242,13 @@ class ExecLibrary(AmigaLibrary):
   def AllocVec(self, ctx):
     size = ctx.cpu.r_reg(REG_D0)
     flags = ctx.cpu.r_reg(REG_D1)
-    mb = self.alloc.alloc_memory("AllocVec(@%06x)" % self.get_callee_pc(ctx),size)
+    pc = self.get_callee_pc(ctx)
+    if ctx.label_mgr != None:
+      tag = ctx.label_mgr.get_mem_str(pc)
+    else:
+      tag = None
+    name = "AllocVec(%06x = %s)" % (pc,tag)
+    mb = self.alloc.alloc_vector(name,size)
     log_exec.info("AllocVec: %s" % mb)
     return mb.addr
 
@@ -254,7 +260,7 @@ class ExecLibrary(AmigaLibrary):
     mb = self.alloc.get_memory(addr)
     if mb != None:
       log_exec.info("FreeVec: %s" % mb)
-      self.alloc.free_memory(mb)
+      self.alloc.free_vector(mb)
     else:
       raise VamosInternalError("FreeVec: Unknown memory to free: ptr=%06x" % (addr))
 

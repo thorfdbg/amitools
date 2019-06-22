@@ -53,6 +53,7 @@ class CLIStruct(AmigaStruct):
     ('LONG','cli_DefaultStack'),
     ('BPTR','cli_StandardOutput'),
     ('BPTR','cli_Module'),
+    ('APTR','cli_History'),
   ]
 CLIDef = CLIStruct()
 

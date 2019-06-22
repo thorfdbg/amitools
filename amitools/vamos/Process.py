@@ -22,6 +22,9 @@ class Process:
     # thor: the boot shell creates its own CLI if it is not there.
     # but for now, supply it with the Vamos CLI and let it initialize
     # it through the private CliInit() call of the dos.library
+    self.shell_packet = None
+    self.shell_message = None
+    self.shell_port    = None
     if not shell:
       self.shell = False
       self.init_args(bin_args,input_fh)
@@ -31,9 +34,7 @@ class Process:
       self.bin_args = None
       self.shell = True
       self.init_cli_struct(None,None,None)
-    self.shell_message = None
-    self.shell_packet  = None
-    self.shell_port    = None
+      self.run_system(True)
     self.init_task_struct(input_fh, output_fh)
     self.set_cwd()
 
@@ -201,7 +202,7 @@ class Process:
       self.ctx.exec_lib.port_mgr.free_port(self.shell_port)
       self.shell_port = None
 
-  def run_system(self):
+  def run_system(self, startup = False):
     if self.shell_packet == None:
       # Ok, here we have to create a DosPacket for the shell startup
       self.shell_message = self.ctx.alloc.alloc_struct("Shell Startup Message",MessageDef)
@@ -213,6 +214,10 @@ class Process:
     self.shell_packet.access.w_s("dp_Link",self.shell_message.addr)
     self.shell_packet.access.w_s("dp_Port",self.shell_port)
     self.shell_message.access.w_s("mn_Node.ln_Name",self.shell_packet.addr)
+    if not startup:
+      self.shell_packet.access.w_s("dp_Arg1",0) # indicates (for vamos) regular startup
+    else:
+      self.shell_packet.access.w_s("dp_Arg1",1) # indicates system startup
     while self.ctx.exec_lib.port_mgr.has_msg(self.shell_port):
       self.ctx.exec_lib.port_mgr.get_msg(self.shell_port)
     return self.shell_packet.addr

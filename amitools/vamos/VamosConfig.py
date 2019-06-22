@@ -135,9 +135,9 @@ class VamosConfig(ConfigParser.SafeConfigParser):
   def _reset(self):
     # library config
     self.libs = {
-      'dos.library' : VamosLibConfig('vamos', 40, False),
-      'exec.library' : VamosLibConfig('vamos', 40, False),
-      'icon.library' : VamosLibConfig('auto', 0, False)
+      'dos.library' : VamosLibConfig('vamos', 47, False),
+      'exec.library' : VamosLibConfig('vamos', 45, False),
+      'icon.library' : VamosLibConfig('auto', 45, False)
     }
     # define keys that can be set
     self._keys = {

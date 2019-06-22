@@ -1637,10 +1637,15 @@ class DosLibrary(AmigaLibrary):
     log_dos.info("CliInitRun")
     clip_addr = self.Cli(ctx)
     clip      = AccessStruct(ctx.mem,CLIDef,struct_addr=clip_addr)
-    pkt       = ctx.cpu.r_reg(REG_A0)
-    log_dos.info("CliInitRun (0x%06x)" % pkt)
+    pkt_addr  = ctx.cpu.r_reg(REG_A0)
+    log_dos.info("CliInitRun (0x%06x)" % pkt_addr)
     # This would typically initialize the CLI for running a command
     # from the packet. Anyhow, this is already done, so do nothing here
+    # Since V47, CliInit is not used for starting a boot shell anymore
+    # so instead dispatch depending on Arg1
+    pkt       = AccessStruct(ctx.mem,DosPacketDef,pkt_addr)
+    if pkt.r_s("dp_Arg1") == 1:
+      return self.CliInit(ctx)
     return 0x80000004 #valid, and a System() call.
 
   # ----- DosList -------------

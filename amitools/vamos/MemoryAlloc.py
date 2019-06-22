@@ -173,6 +173,14 @@ class MemoryAlloc:
     #  self.dump_orphans()
     return addr
 
+  def alloc_vec(self, size, except_on_fail = True):
+    """allocate memory in allocVec style, recording the size in the memory itself"""
+    addr = self.alloc_mem(size + 4,except_on_fail)
+    if addr != 0:
+      self.mem.access.w32(addr, size)
+      return addr+4
+    return 0
+
   def free_mem(self, addr, size):
     # first check if its a right alloc
     if not self.addrs.has_key(addr):
@@ -202,6 +210,11 @@ class MemoryAlloc:
     num_allocs = len(self.addrs)
     log_mem_alloc.info("[free  @%06x-%06x: %06x bytes] %s", addr, addr+size, size, self._stat_info())
 
+  def free_vec(self, addr):
+    if addr != 0:
+      size = self.mem.access.r32(addr-4)
+      self.free_mem(addr-4,size)
+    
   def get_range_by_addr(self, addr):
     if self.addrs.has_key(addr):
       return self.addrs[addr]
@@ -267,6 +280,20 @@ class MemoryAlloc:
     self.mem_objs[addr] = mem
     return mem
 
+  def alloc_vector(self, name, size, add_label=True, except_on_failure = True):
+    addr = self.alloc_vec(size, except_on_failure)
+    if addr == 0:
+      return None
+    if add_label and self.label_mgr != None:
+      label = LabelRange(name, addr, size)
+      self.label_mgr.add_label(label)
+    else:
+      label = None
+    mem = Memory(addr,size,label,self.mem.access)
+    log_mem_alloc.info("alloc memory: %s",mem)
+    self.mem_objs[addr] = mem
+    return mem
+
   def free_memory(self, mem):
     log_mem_alloc.info("free memory: %s",mem)
     if mem.label != None:
@@ -274,10 +301,17 @@ class MemoryAlloc:
     self.free_mem(mem.addr, mem.size)
     del self.mem_objs[mem.addr]
 
+  def free_vector(self, mem):
+    log_mem_alloc.info("free vector: %s",mem)
+    if mem.label != None:
+      self.label_mgr.remove_label(mem.label)
+    self.free_vec(mem.addr)
+    del self.mem_objs[mem.addr]
+
   # struct
   def alloc_struct(self, name, struct):
     size = struct.get_size()
-    addr = self.alloc_mem(size)
+    addr = self.alloc_vec(size)
     if self.label_mgr != None:
       label = LabelStruct(name, addr, struct)
       self.label_mgr.add_label(label)
@@ -304,7 +338,7 @@ class MemoryAlloc:
     log_mem_alloc.info("free struct: %s",mem)
     if self.label_mgr != None:
       self.label_mgr.remove_label(mem.label)
-    self.free_mem(mem.addr, mem.size)
+    self.free_vec(mem.addr)
     del self.mem_objs[mem.addr]
 
   # cstr

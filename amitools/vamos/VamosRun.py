@@ -56,9 +56,8 @@ class VamosRun:
     if self.shell:
       # thor: If we run a shell through vamos, then
       # BPCL places the BPTR to the parameter packet into
-      # d1. The default shell can work without ParmPkt
-      # thus leave this at zero for this time.
-      self.cpu.w_reg(REG_D1, 0)
+      # d1.
+      self.cpu.w_reg(REG_D1, self.ctx.process.shell_packet.addr >> 2)
     else:
       self.cpu.w_reg(REG_D0, self.ctx.process.arg_len)
       self.cpu.w_reg(REG_A0, self.ctx.process.arg_base)
