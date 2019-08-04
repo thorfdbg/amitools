@@ -87,7 +87,7 @@ class Args:
         else:
           arg += b
       else:
-        if b == ' ' or b == '\t' or b == '\n':
+        if b == ' ' or b == '\t' or b == '\n' or (b == '=' and not inquote):
           args += [arg]
           arg   = ""
           inspace = True
@@ -142,15 +142,9 @@ class Args:
     
   """apply an internal template to a given argument array, this already expects an array of strings.
   """
-  def parse_string(self, in_args):
+  def parse_string(self, args):
     self.error = NO_ERROR
 
-    # get args and split = into args, too
-    args = []
-    for a in in_args:
-      b = a.split('=')
-      args += b
-      
     # prepare result array
     result = []
     targs = self.targs
