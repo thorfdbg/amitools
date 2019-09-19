@@ -1687,7 +1687,10 @@ class DosLibrary(AmigaLibrary):
     string   = ctx.mem.access.r_cstr(str_addr)
     match    = re.search("(\+|\-|)[0-9]*",string)
     if len(match.group(0)) > 0:
-      ctx.mem.access.w32(val_addr,int(match.group(0)))
+      value = int(match.group(0))
+      if value < 0:
+        value = value + 0x100000000
+      ctx.mem.access.w32(val_addr,value)
       return len(match.group(0))
     else:
       return 0
