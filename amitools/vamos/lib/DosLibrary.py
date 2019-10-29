@@ -598,6 +598,9 @@ class DosLibrary(AmigaLibrary):
     fh_b_addr = ctx.cpu.r_reg(REG_D1)
     if fh_b_addr == 0:
       return -1
+    handle    = AccessStruct(self.mem,FileHandleDef,struct_addr=fh_b_addr * 4)
+    if handle.r_s("fh_End") == 0:
+      return -1
     fh = self.file_mgr.get_by_b_addr(fh_b_addr,False)
     ch = fh.getc()
     if ch == -1:
@@ -770,6 +773,10 @@ class DosLibrary(AmigaLibrary):
       return -1
     bufaddr   = ctx.cpu.r_reg(REG_D2)
     buflen    = ctx.cpu.r_reg(REG_D3)
+    handle    = AccessStruct(self.mem,FileHandleDef,struct_addr=fh_b_addr * 4)
+    # This is how endcli works.
+    if handle.r_s("fh_End") == 0:
+      return -1
     fh   = self.file_mgr.get_by_b_addr(fh_b_addr,False)
     line = fh.gets(buflen)
     # Bummer! FIXME: There is currently no way this can communicate an I/O error

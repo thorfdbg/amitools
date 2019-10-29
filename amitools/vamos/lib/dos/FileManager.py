@@ -8,6 +8,7 @@ import stat
 from amitools.vamos.Log import log_file
 from amitools.vamos.AccessStruct import AccessStruct
 from DosStruct import DosPacketDef
+from DosStruct import FileHandleDef
 from amitools.vamos.lib.lexec.ExecStruct import MessageDef
 from Error import *
 from DosProtection import DosProtection
@@ -42,8 +43,10 @@ class FileManager:
     return self.fs_handler_port
 
   def _register_file(self, fh):
-    baddr = fh.alloc_fh(self.alloc, self.fs_handler_port)
+    baddr  = fh.alloc_fh(self.alloc, self.fs_handler_port)
     self.files_by_b_addr[baddr] = fh
+    handle = AccessStruct(self.mem,FileHandleDef,struct_addr=baddr * 4)
+    handle.w_s("fh_End",0xffffffff)
     log_file.info("registered: %s" % fh)
 
   def _unregister_file(self,fh):
