@@ -449,6 +449,9 @@ class DosLibrary(AmigaLibrary):
     cli_addr = ctx.process.get_cli_struct()
     log_dos.info("Cli() -> %06x" % cli_addr)
     return cli_addr
+  
+  def ExtendedCli(self, ctx):
+    return 0
 
   def Input(self, ctx):
     return ctx.process.this_task.access.r_s("pr_CIS") >> 2
