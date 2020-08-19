@@ -266,7 +266,10 @@ class MarkerStack:
     return self.stack[pos]
   
   def drop(self, pos):
-    self.stack = self.stack[:pos-1]
+    # drop markers including the one at pos
+    # thor note: this used to be :pos-1
+    # but broke patterns such as ~(#?.o)
+    self.stack = self.stack[:pos]
   
   def __str__(self):    
     return ",".join(map(str, self.stack))
