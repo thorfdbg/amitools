@@ -243,9 +243,13 @@ class DosLibrary(AmigaLibrary):
       log_file.info("file not found: '%s' -> '%s'" % (ami_path, sys_path))
       self.setioerr(ctx,ERROR_OBJECT_NOT_FOUND)
       return self.DOSFALSE
-    else:
+    elif os.path.exists(sys_path):
       os.utime(sys_path,(seconds,seconds))
       return self.DOSTRUE
+    else:
+      log_file.info("file not found: '%s' -> '%s'" % (self.get_current_dir(), sys_path))
+      self.setioerr(ctx,ERROR_OBJECT_NOT_FOUND)
+      return self.DOSFALSE
 
   def SetComment(self, ctx):
     # the typical unixoid file system does not implement this
