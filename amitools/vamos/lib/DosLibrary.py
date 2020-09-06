@@ -1394,6 +1394,13 @@ class DosLibrary(AmigaLibrary):
       # print "*** Current input is %s" % input_fh
       # trap to clean up sub process resources
       def trap_stop_run_command(ret_code):
+        # The shell will have stashed the command's return code
+        # and IoErr() value in the clib_ReturnCode and cli_Result2
+        # fields, respectively. This is how a new Process created by
+        # SystemTagList() or Execute(), which uses the CommandLineInterface
+        # structure of its parent, will transmit this information.
+        cli_return_code = cli.r_s("cli_ReturnCode")
+        cli_result2 = cli.r_s("cli_Result2")
         cli.w_s("cli_CurrentInput",input_fhci)
         cli.w_s("cli_StandardInput",input_fhsi)
         cli.w_s("cli_Background",self.DOSFALSE)
@@ -1408,9 +1415,10 @@ class DosLibrary(AmigaLibrary):
         #infile.setbuf("")
         self.ctx.process.set_current_dir(current_dir)
         self.cur_dir_lock = self.lock_mgr.get_by_b_addr(current_dir >> 2)
-        ctx.cpu.w_reg(REG_D0,0)
-        self.setioerr(ctx, ret_code)
-        log_dos.info("SystemTagList returned: cmd='%s' tags=%s", cmd, tag_list)
+        # Fill in the command's return value and error code.
+        ctx.cpu.w_reg(REG_D0, cli_return_code)
+        self.setioerr(ctx, cli_result2)
+        log_dos.info("SystemTagList returned: ret_code=%d, cli_ReturnCode=%d, cli_Result2=%d, cmd='%s' tags=%s", ret_code, cli_return_code, cli_result2, cmd, tag_list)
         return 0
       # The return code remains in d0 as is
       ctx.run_shell(ctx.process.shell_start,packet,stacksize,trap_stop_run_command)
