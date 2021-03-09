@@ -137,9 +137,10 @@ class BinFmtHunk:
     for seg in bi_segs:
       # add relocations?
       hseg = seg.file_data
-      reloc_blk = hseg.reloc_blk
-      if reloc_blk is not None:
-        self._add_hunk_relocs(reloc_blk, seg, bi_segs)
+      reloc_blks = hseg.reloc_blks
+      if reloc_blks is not None:
+        for blk in reloc_blks:
+          self._add_hunk_relocs(blk, seg, bi_segs)
       # add symbol table
       symbol_blk = hseg.symbol_blk
       if symbol_blk is not None:

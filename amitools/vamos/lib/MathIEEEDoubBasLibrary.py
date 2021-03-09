@@ -73,7 +73,6 @@ class MathIEEEDoubBasLibrary(AmigaLibrary):
   def IEEEDPAdd(self,ctx):
     arg1=toDouble(ctx.cpu.r_reg(REG_D0),ctx.cpu.r_reg(REG_D1))
     arg2=toDouble(ctx.cpu.r_reg(REG_D2),ctx.cpu.r_reg(REG_D3))
-    print "%s + %s = %s" % (arg1,arg,arg1+arg2)
     (hi,lo)=fromDouble(arg1+arg2)
     ctx.cpu.w_reg(REG_D1,lo)
     return hi
@@ -81,7 +80,6 @@ class MathIEEEDoubBasLibrary(AmigaLibrary):
   def IEEEDPSub(self,ctx):
     arg1=toDouble(ctx.cpu.r_reg(REG_D0),ctx.cpu.r_reg(REG_D1))
     arg2=toDouble(ctx.cpu.r_reg(REG_D2),ctx.cpu.r_reg(REG_D3))
-    print "%s - %s = %s" % (arg1,arg,arg1-arg2)
     (hi,lo)=fromDouble(arg1-arg2)
     ctx.cpu.w_reg(REG_D1,lo)
     return hi
@@ -89,7 +87,6 @@ class MathIEEEDoubBasLibrary(AmigaLibrary):
   def IEEEDPMul(self,ctx):
     arg1=toDouble(ctx.cpu.r_reg(REG_D0),ctx.cpu.r_reg(REG_D1))
     arg2=toDouble(ctx.cpu.r_reg(REG_D2),ctx.cpu.r_reg(REG_D3))
-    print "%s * %s = %s" % (arg1,arg,arg1*arg2)
     (hi,lo)=fromDouble(arg1*arg2)
     ctx.cpu.w_reg(REG_D1,lo)
     return hi
@@ -97,7 +94,6 @@ class MathIEEEDoubBasLibrary(AmigaLibrary):
   def IEEEDPDiv(self,ctx):
     arg1=toDouble(ctx.cpu.r_reg(REG_D0),ctx.cpu.r_reg(REG_D1))
     arg2=toDouble(ctx.cpu.r_reg(REG_D2),ctx.cpu.r_reg(REG_D3))
-    print "%s / %s = %s" % (arg1,arg,arg1/arg2)
     (hi,lo)=fromDouble(arg1/arg2)
     ctx.cpu.w_reg(REG_D1,lo)
     return hi
