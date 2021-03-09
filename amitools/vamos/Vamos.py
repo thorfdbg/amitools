@@ -366,7 +366,7 @@ class Vamos:
     self.lib_mgr.register_vamos_lib(self.mathdoubbas_lib_def)
     # mathsingbas
     mathsingbas_cfg = cfg.get_lib_config('mathieeesingbas.library')
-    self.mathsingbas_lib_def = MathIEEEDoubBasLibrary(mathsingbas_cfg)
+    self.mathsingbas_lib_def = MathIEEESingBasLibrary(mathsingbas_cfg)
     self.lib_mgr.register_vamos_lib(self.mathsingbas_lib_def)    
     # timer
     timer_cfg = cfg.get_lib_config('timer.device')
