@@ -1,0 +1,10 @@
+#!/bin/bash
+# This is a demo shell script that
+# runs vamos. Adjust as needed.
+PATH="$PATH:$HOME/src/amitools/"
+rm -rf /tmp/amiga
+rm -rf /tmp/env
+mkdir -p /tmp/amiga/t
+mkdir -p /tmp/env
+export PYTHONPATH="$HOME/src/amitools/"
+python -m amitools.tools.vamos -x L:Shell-Seg -l dos:info,exec:info,file:info,utility:info 2>log

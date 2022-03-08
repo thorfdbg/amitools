@@ -1,0 +1,76 @@
+# Adjust this file as needed and rename to
+# .vamosrc in the directory where you want to
+# run vamos.
+[vamos]
+ram_size=262144
+stack_size=32
+hw_access=disable
+cpu=68020
+
+[volumes]
+SCSI=/store/Amiga
+VIF=/store/VIF
+RAM=/tmp/amiga
+P96=.
+ENV=/tmp/env
+
+[assigns]
+SYS=SCSI:
+DEVS=SYS:Devs
+L=SYS:L
+S=P96:S
+C=SYS:C
+T=RAM:T
+SC=SYS:SAS/
+QUAD=T:
+SAS=SC:
+LIB=SC:Lib
+LIBS=SYS:Libs,SC:Libs,P96:LIBS
+INCLUDE=P96:Include,P96:publicinclude,P96:PrivateInclude,SC:Include
+CXXINCLUDE=SC:CXXInclude/
+LIB=SAS:Lib
+
+[path]
+# every undefined assign "xy:" will be mapped to "system:xy/"
+#auto_assign=system:
+path=C:,SC:bin,P96:C
+
+# disable loading library in any case
+[68040.library]
+mode=off
+
+# "auto" mode: either use amiga library if available and fall back
+# to vamos internal lib if not amiga library was found
+[icon.library]
+mode=vamos
+
+[utility.library]
+mode=vamos
+
+[locale.library]
+mode=off
+
+[intuition.library]
+mode=vamos
+
+[icon.library]
+mode=vamos
+
+[mathffp.library]
+mode=off
+
+[mathtrans.library]
+mode=off
+
+[mathieeedoubbas.library]
+mode=off
+
+[mathieeedoubtrans.library]
+mode=off
+
+[timer.device]
+mode=vamos
+
+[graphics.library]
+mode=vamos
+
