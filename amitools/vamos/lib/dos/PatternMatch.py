@@ -149,7 +149,7 @@ def pattern_parse(src_str, ignore_case=True, star_is_wild=False):
         elif ch == '\'':
           pass
         else:
-          dst += tr(ch)
+          dst += ch
         pos += 1
       if pos == n_src:
         return None
@@ -181,7 +181,7 @@ def pattern_parse(src_str, ignore_case=True, star_is_wild=False):
     
     # any other non-wildcard char
     else:
-      dst += tr(src)
+      dst += src
       
     pos += 1
     if flush_blocks:
@@ -427,7 +427,7 @@ def pattern_match(pattern, in_str, ignore_case=True, debug=False):
         pat_pos += 1
         while True:
           # get next char in class
-          p_ch = pat[pat_pos]
+          p_ch = tr(pat[pat_pos])
           cmd = ord(p_ch)
           pat_pos += 1
         
@@ -468,7 +468,7 @@ def pattern_match(pattern, in_str, ignore_case=True, debug=False):
         pat_pos += 1
         while True:
           # get next char in class        
-          p_ch = pat[pat_pos]
+          p_ch = tr(pat[pat_pos])
           cmd = ord(p_ch)
           pat_pos += 1
 
@@ -516,12 +516,12 @@ def pattern_match(pattern, in_str, ignore_case=True, debug=False):
     else:
       # get next string char
       if str_pos < n_str:
-        s_ch = tr(in_str[str_pos])
+        s_ch = in_str[str_pos]
       else:
         s_ch = '\0'
   
       # char matched
-      if p_ch == s_ch:
+      if tr(p_ch) == tr(s_ch):
         str_pos += 1
         pat_pos += 1
         if debug:

@@ -21,6 +21,7 @@ class MatchFirstNext:
     self.total_size = AnchorPathDef.get_size() + self.str_len
     self.flags = anchor.r_s('ap_Flags')
     # setup matcher
+    #print "*** %s,%s" % (pattern,self.lock)
     self.matcher = PathMatch(self.path_mgr,self.lock)
     self.ok = self.matcher.parse(self.pattern)
     # init state
@@ -71,7 +72,8 @@ class MatchFirstNext:
     # store path name of first name at end of structure
     if self.str_len > 0:
       path_ptr = self.anchor.s_get_addr('ap_Buf')
-      self.anchor.w_cstr(path_ptr, path[file_part(path):])
+      #print "putting path %s,%s into ap_Buf" % (path,path[file_part(path):])
+      self.anchor.w_cstr(path_ptr, path) #[file_part(path):])
     return io_err
 
   def _fill_lock(self, path):
