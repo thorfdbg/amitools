@@ -522,6 +522,7 @@ class DosLibrary(AmigaLibrary):
 
     fh = self.file_mgr.get_by_b_addr(fh_b_addr,False)
     data = fh.read(size)
+    self.setioerr(ctx,0)
     ctx.mem.access.w_data(buf_ptr, data)
     got = len(data)
     log_dos.info("Read(%s, %06x, %d) -> %d" % (fh, buf_ptr, size, got))
@@ -534,6 +535,7 @@ class DosLibrary(AmigaLibrary):
 
     fh = self.file_mgr.get_by_b_addr(fh_b_addr,True)
     data = ctx.mem.access.r_data(buf_ptr,size)
+    self.setioerr(ctx,0)
     fh.write(data)
     got = len(data)
     log_dos.info("Write(%s, %06x, %d) -> %d" % (fh, buf_ptr, size, got))
