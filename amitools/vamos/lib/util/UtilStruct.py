@@ -18,3 +18,17 @@ class HookStruct(AmigaStruct):
     ('APTR','h_Data')
     ]
 HookDef = HookStruct()
+
+class ClockDataStruct(AmigaStruct):
+  _name = "ClockData"
+  _format = [
+    ('UWORD','sec'),
+    ('UWORD','minute'),
+    ('UWORD','hour'),
+    ('UWORD','mday'),
+    ('UWORD','month'),
+    ('UWORD','year'),
+    ('UWORD','wday')
+    ]
+ClockDataDef = ClockDataStruct()
+

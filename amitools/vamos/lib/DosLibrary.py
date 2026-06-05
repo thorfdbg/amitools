@@ -1717,7 +1717,7 @@ class DosLibrary(AmigaLibrary):
       ctx.mem.access.w32(val_addr,value)
       return len(match.group(0))
     else:
-      return 0
+      return -1
 
   def SetCurrentDirName(self,ctx):
     str_addr = ctx.cpu.r_reg(REG_D1)

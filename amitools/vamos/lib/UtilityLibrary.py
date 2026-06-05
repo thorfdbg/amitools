@@ -5,7 +5,6 @@ from amitools.vamos.AccessStruct import AccessStruct
 from util.UtilStruct import *
 from util.TagList import *
 
-
 class UtilityLibrary(AmigaLibrary):
   name = "utility.library"
 
@@ -128,3 +127,44 @@ class UtilityLibrary(AmigaLibrary):
         taglist_ptr += 8
     log_utility.info("FilterTagItems(0x%08x,0x%08lx,%d) -> %d" % (taglist_ptr,filter_ptr,logic,nvalid))
     return nvalid
+
+  def Date2Amiga(self, ctx):
+    date_ptr = ctx.cpu.r_reg(REG_A0)
+    clock = AccessStruct(ctx.mem,ClockDataDef,struct_addr=date_ptr)
+    month = clock.r_s("month") + 9
+    year  = clock.r_s("year") - 1 + month / 12
+    month = month % 12
+    month = month * 306 + 5
+    date  = year * 365 + year / 4 - year / 100 + year / 400 + month / 10 + clock.r_s("mday") - 1 - 722390
+    hour  = date * 24 + clock.r_s("hour")
+    minute = hour * 60 + clock.r_s("minute")
+    second = minute * 60 + clock.r_s("sec")
+    ctx.cpu.w_reg(REG_D0,second)
+
+  def Amiga2Date(self, ctx):
+    date_ptr = ctx.cpu.r_reg(REG_A0)
+    seconds = ctx.cpu.r_reg(REG_D0)
+    clock = AccessStruct(ctx.mem,ClockDataDef,struct_addr=date_ptr)
+    secs = seconds % 60
+    minute = seconds / 60
+    hour = minute / 60
+    minute = minute % 60
+    hour = hour % 24
+    absday = seconds / (60 * 60 * 24) + 722390
+    clock.w_s("wday",(absday + 3) % 7)
+    work = absday - (absday + 1) / 146097
+    work = work + work / 36524
+    work = work - (work + 1) / 1461
+    year = work / 365
+    work = absday - year * 365 - year / 4 + year / 100 - year / 400
+    month = (work / 153) * 5 + (10 * (work % 153)) / 305
+    day = 1 + work - (month * 306 + 5) / 10
+    month = month + 2
+    year = year + month / 12
+    month = month % 12 + 1
+    clock.w_s("sec",secs)
+    clock.w_s("minute",minute)
+    clock.w_s("hour",hour)
+    clock.w_s("mday",day)
+    clock.w_s("month",month)
+    clock.w_s("year",year)
