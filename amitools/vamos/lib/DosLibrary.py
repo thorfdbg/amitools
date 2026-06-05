@@ -506,6 +506,27 @@ class DosLibrary(AmigaLibrary):
     else:
       return fh.b_addr
 
+  def OpenFromLock(self, ctx):
+    lock_b_addr = ctx.cpu.r_reg(REG_D1)
+    if lock_b_addr == 0:
+      self.setioerr(ctx,ERROR_OBJECT_WRONG_TYPE)
+      return 0
+    else:
+      lock = self.lock_mgr.get_by_b_addr(lock_b_addr)
+      if lock.exclusive:
+        f_mode = "rwb+"
+        mode_name = "r/w"
+      else:
+        f_mode = "rb+"
+        mode_name = "r"
+      fh = self.file_mgr.open(lock, "", f_mode)
+      log_dos.info("OpenFromLock: lock='%s' (%s/%s) -> %s" % (lock, mode_name, f_mode, fh))
+      if fh == None:
+        self.setioerr(ctx,ERROR_OBJECT_NOT_FOUND)
+        return 0
+      else:
+        return fh.b_addr
+    
   def Close(self, ctx):
     fh_b_addr = ctx.cpu.r_reg(REG_D1)
     if fh_b_addr != 0:
