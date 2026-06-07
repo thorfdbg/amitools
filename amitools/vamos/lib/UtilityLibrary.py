@@ -56,6 +56,10 @@ class UtilityLibrary(AmigaLibrary):
   def ToUpper(self, ctx):
     a = ctx.cpu.r_reg(REG_D0) & 0xff
     return ord(chr(a).upper())
+  
+  def ToLower(self, ctx):
+    a = ctx.cpu.r_reg(REG_D0) & 0xff
+    return ord(chr(a).lower())
 
   def Stricmp(self, ctx):
     str1_addr = ctx.cpu.r_reg(REG_A0)
